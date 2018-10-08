@@ -20,32 +20,21 @@
 #    ]
 #}
 filepath="/mnt/orangepekoe/Music/list.json"
+dir="$1"
+program="$2"
+date="$3"
 
-fileList=$(ls /mnt/orangepekoe/Music/* | grep _20 )
-# reserved by update check block
+lastnum=$(cat -n /mnt/orangepekoe/Music/list.json | tail -n 1 | cut -f 1 | sed -e 's/ //g')
+last2=$(echo $((${lastnum} - 2)))
 
-programList=$(echo "$fileList" | cut -d_ -f 1| sort | uniq)
-echo "{" > $filepath
-cat << _EOF_ > $filepath
-{
-    "version": "https://jsonfeed.org/version/1",
-    "title": "Radiko Feed",
-    "items": [
-        {
-_EOF_
+sed -i "${lastnum},${last2}d" $filepath
 
-for program in $(echo "$programList"); do
-    dateList=$(echo "$fileList" | grep "$program" | cut -d_ -f 2 | sed 's/.m4a//g')
-
-    for date in $(echo "$dateList"); do
-        cat << _EOL_ >> $filepath
+cat << _EOL_ >> $filepath
         },
         {
-            "id": "http://192.168.0.10/Music/${program}/${program}_${date}.m4a"
+            "id": "http://192.168.0.10/Music/${dir}/${dir}_${date}.m4a"
             "title": "${program} ${date}"
 _EOL_
-    done
-done
 
 echo '        }' >> $filepath
 echo '    ]' >> $filepath
